@@ -1,0 +1,8 @@
+.gitignore
+*.swp
+*.beam
+.eunit
+ebin
+doc
+rel
+erl_crash.dump
