@@ -77,7 +77,7 @@ read_tags(<< NumEntries:2/binary, Rest/binary >>, StartPos, End, TagFun) ->
   read_tags(Rest, N, StartPos, End, TagFun).
 
 read_tags(Bin, NumEntries, StartPos, End, TagFun) ->
-  read_tags(Bin, NumEntries, StartPos, End, TagFun, dict:new()).
+  read_tags(Bin, NumEntries, StartPos, End, TagFun, #{}).
 
 read_tags(_Bin, 0, _StartPos, _End, _TagFun, Tags) ->
   Tags;
@@ -94,12 +94,12 @@ add_tag(<< Tag:2/binary, Rest/binary >>, StartPos, End, Tags, TagFun) ->
       Tags;
     exif ->
       ExifTags = read_subtags(Rest, Value, StartPos, End, fun exif_tag/1),
-      dict:merge(fun(_K, _ImageTag, ExifTag) -> ExifTag end, Tags, ExifTags);
+      maps:merge(Tags, ExifTags);
     gps ->
       GpsTags = read_subtags(Rest, Value, StartPos, End, fun gps_tag/1),
-      dict:merge(fun(_K, _ImageTag, GpsTag) -> GpsTag end, Tags, GpsTags);
+      maps:merge(Tags, GpsTags);
     _ ->
-      dict:store(Name, Value, Tags)
+      Tags#{Name => Value}
   end,
   Len = ?FIELD_LEN - 2, % 2 bytes for the tag above.
   << _:Len/binary, NewRest/binary >> = Rest,
